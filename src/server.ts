@@ -61,9 +61,7 @@ app.use("/ping/:id", function (req, res) {
   res.status(200).send("pong");
 });
 
-
 // deaddrop API
-// token=ThisIsTheSecurityToken&team_id=T11STRFEE&team_domain=cenersys&channel_id=D1KD9E5EX&channel_name=directmessage&user_id=U11SMQJV7&user_name=gabriel&command=%2Fdeaddrop&text=1234567890+1&response_url=https%3A%2F%2Fhooks.slack.com%2Fcommands%2FT11STRFEE%2F308973064513%2FP16P31nkjIuqRpEZ3VDNQnWh
 // token=ThisIsTheSecurityToken&user_name=gabriel&text=1234567890+1
 app.post("/slack", (req: Request, res: Response) => {
   logger.debug("POST to slack ");
@@ -169,43 +167,37 @@ app.use("/deaddrop/group/:id", (req: Request, res: Response) => {
 // Serve and then remove deaddrop file
 app.use("/deaddrop/:id", (req: Request, res: Response) => {
 
-  if (req.session && req.session.user) {
+  const id = req.params.id;
 
-    const id = req.params.id;
+  logger.info("Deadrop request for %s", id);
+  logger.debug("... if it exist, delete file after serving it!");
 
-    logger.info("Deadrop request for %s", id);
-    logger.debug("... if it exist, delete file after serving it!");
-
-    fs.open(deaddrop_dir + id, "r", (err, fd: any) => {
-      if (err) {
-        if (err.code === "ENOENT") {
-          logger.error("File does not exist");
-          res.sendStatus(404);
-        }
-      } else {
-        fs.readFile(fd, {encoding: "utf-8"}, (err: any, data: string) => {
-          if (err) {
-            logger.error(err);
-            res.sendStatus(404);
-          } else {
-            logger.info("file served");
-            res.status(200).send(data);
-            fs.unlink(deaddrop_dir + id, (err) => {
-              if (err) {
-                logger.error("Error deleting %s%s: %s", deaddrop_dir, id, err);
-              } else {
-                logger.info(deaddrop_dir + id + " deleted successfully!");
-              }
-            });
-          }
-        });
+  fs.open(deaddrop_dir + id, "r", (err, fd: any) => {
+    if (err) {
+      if (err.code === "ENOENT") {
+        logger.error("File does not exist");
+        res.sendStatus(404);
       }
-    });
+    } else {
+      fs.readFile(fd, {encoding: "utf-8"}, (err: any, data: string) => {
+        if (err) {
+          logger.error(err);
+          res.sendStatus(404);
+        } else {
+          logger.info("file served");
+          res.status(200).send(data);
+          fs.unlink(deaddrop_dir + id, (err) => {
+            if (err) {
+              logger.error("Error deleting %s%s: %s", deaddrop_dir, id, err);
+            } else {
+              logger.info(deaddrop_dir + id + " deleted successfully!");
+            }
+          });
+        }
+      });
+    }
+  });
 
-  } else {
-    logger.error("Authentication failure!");
-    res.sendStatus(401);
-  }
 });
 
 // default page
