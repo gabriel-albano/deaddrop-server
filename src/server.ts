@@ -41,6 +41,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 const dir = path.resolve(__dirname);
+// logger.debug(dir);
 const deaddrop_dir = dir + "/deaddrop/";
 
 const expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
@@ -72,7 +73,7 @@ app.post("/slack", (req: Request, res: Response) => {
 
     const data: string[] = req.query["text"].split(" ");
     // The absolute path of the new file with its name
-    const filepath = "deaddrop/" + data[0];
+    const filepath = deaddrop_dir + data[0];
 
     logger.debug("Deaddrop for %s value %s from %s", data[0], data[1], req.query["user_name"]);
 

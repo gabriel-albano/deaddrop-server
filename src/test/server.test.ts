@@ -63,28 +63,27 @@ describe("GET /deaddrop/all/version1?id=1234567890", () => {
 // must create file first
 describe("GET /ping/1234567890 and /deaddrop/1234567890", () => {
 
-  describe("Create a deadrop file", () => {
-    it("should return 200", (done) => {
-      request.post(baseUrl + "slack?token=Zj8drpBblKeQLd4EMPb0HW84&user_name=gabriel&text=1234567890+1").send()
-        .end(function assert(err, res) {
+  it("should return 200", (done) => {
+    request.post(baseUrl + "slack?token=ThisIsTheSecurityToken&user_name=gabriel&text=1234567890+1").send()
+      .end(function assert(err, res) {
         expect(err).to.be.equal(null);
         expect(res.status).to.be.equal(200);
-        it("should return 200", (done) => {
-          const agent = request.agent();
-          agent.get(baseUrl + "ping/1234567890").send().end(function assert(err, res) {
+
+        const agent = request.agent();
+        agent.get(baseUrl + "ping/1234567890").send().end(function assert(err, res) {
+          expect(err).to.be.equal(null);
+          expect(res).to.have.property("status", 200);
+          agent.get(baseUrl + "deaddrop/1234567890").send().end(function assert(err, res) {
             expect(err).to.be.equal(null);
-            expect(res).to.have.property("status", 200);
-            agent.get(baseUrl + "deaddrop/1234567890").send().end(function assert(err, res) {
-              expect(err).to.be.equal(null);
-              expect(res.status).to.be.equal(200);
-              expect(res.body).to.be.equal("1");
-              done();
-            });
+            expect(res.status).to.be.equal(200);
+            expect(res.text).to.be.equal("1");
+            done();
           });
         });
+
       });
-    });
   });
+
 });
 
 describe("GET /ping/1234567890 and /deaddrop/group/group1?id=1234567890", () => {
